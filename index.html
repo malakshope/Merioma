@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TechZone Assistant</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  font-family:'Cairo',sans-serif;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:#000;
+  color:#fff;
+  overflow:hidden;
+}
+
+/* 🌌 Premium cinematic background */
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255,255,255,0.08), transparent 40%),
+    radial-gradient(circle at 70% 80%, rgba(255,255,255,0.05), transparent 45%),
+    linear-gradient(180deg,#0a0a0a,#000);
+  z-index:-1;
+}
+
+/* chat box */
+.chat{
+  width:380px;
+  height:520px;
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:20px;
+  background:rgba(255,255,255,0.03);
+  backdrop-filter:blur(20px);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  box-shadow:0 40px 100px rgba(0,0,0,0.8);
+}
+
+/* header */
+.header{
+  padding:14px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  font-weight:700;
+}
+
+/* messages */
+.messages{
+  flex:1;
+  padding:15px;
+  overflow-y:auto;
+}
+
+.msg{
+  margin:10px 0;
+  font-size:0.9rem;
+  line-height:1.5;
+}
+
+.user{
+  text-align:right;
+  color:#aaa;
+}
+
+.bot{
+  color:#fff;
+}
+
+/* input */
+.input{
+  display:flex;
+  border-top:1px solid rgba(255,255,255,0.08);
+}
+
+input{
+  flex:1;
+  padding:12px;
+  border:none;
+  outline:none;
+  background:transparent;
+  color:#fff;
+}
+
+button{
+  width:60px;
+  border:none;
+  background:#fff;
+  color:#000;
+  cursor:pointer;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="chat">
+  <div class="header">TechZone Assistant</div>
+
+  <div class="messages" id="messages"></div>
+
+  <div class="input">
+    <input id="input" placeholder="Type..." onkeydown="if(event.key==='Enter')send()">
+    <button onclick="send()">➤</button>
+  </div>
+</div>
+
+<script>
+
+let step = "start";
+
+/* 🧠 FIRST MESSAGE (ALL INFO) */
+const info = `
+🏪 Welcome to TechZone
+
+We sell:
+📱 Smartphones (Samsung, iPhone)
+💻 Laptops (Apple, Dell)
+🎧 Accessories
+
+📍 Algeria
+📞 0555 123 456
+📷 Instagram: @techzone.manager
+
+🚚 Delivery: 24–48 hours
+💳 Payment: Cash / CIB / Edahabia
+
+Do you want to place an order?
+`;
+
+function add(text, type){
+  const div = document.createElement("div");
+  div.className = "msg " + type;
+  div.innerText = text;
+  document.getElementById("messages").appendChild(div);
+  document.getElementById("messages").scrollTop = 9999;
+}
+
+/* start */
+window.onload = ()=>{
+  setTimeout(()=>{
+    add(info,"bot");
+    step = "ask";
+  },800);
+};
+
+function send(){
+  const input = document.getElementById("input");
+  const text = input.value.trim();
+  if(!text) return;
+
+  add(text,"user");
+  input.value="";
+
+  const t = text.toLowerCase();
+
+  setTimeout(()=>{
+
+    /* STEP 1 */
+    if(step === "ask"){
+      if(t.includes("yes") || t.includes("نعم") || t.includes("order") || t.includes("طلب")){
+        add("Great 👍 Send your name, phone and address.", "bot");
+        step = "order";
+      } else {
+        add("Okay 👍 You can come back anytime.", "bot");
+        step = "end";
+      }
+      return;
+    }
+
+    /* STEP 2 */
+    if(step === "order"){
+      add("Are you sure you want to confirm the order?", "bot");
+      step = "confirm";
+      return;
+    }
+
+    /* STEP 3 */
+    if(step === "confirm"){
+      if(t.includes("yes") || t.includes("نعم")){
+        add("🎉 Order confirmed! We will contact you soon.", "bot");
+      } else {
+        add("❌ Order cancelled.", "bot");
+      }
+      step = "end";
+      return;
+    }
+
+    add("How can I help you? 😊", "bot");
+
+  },500);
+}
+
+</script>
+
+</body>
+</html>
