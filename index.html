@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Malak Shop</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Cairo',sans-serif;
+}
+
+body{
+height:100vh;
+overflow:hidden;
+background:#000;
+color:white;
+}
+
+/* الخلفية */
+
+.background{
+position:fixed;
+inset:0;
+overflow:hidden;
+}
+
+.background img{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
+/* طبقة تغميق خفيفة */
+
+.overlay{
+position:absolute;
+inset:0;
+background:rgba(0,0,0,.25);
+}
+
+/* الشات العائم */
+
+.chat-window{
+position:fixed;
+
+right:25px;
+bottom:25px;
+
+width:360px;
+height:520px;
+
+background:rgba(0,0,0,.25);
+
+backdrop-filter:blur(20px);
+
+border:1px solid rgba(255,255,255,.15);
+
+border-radius:25px;
+
+overflow:hidden;
+
+box-shadow:
+0 10px 40px rgba(0,0,0,.6);
+
+z-index:100;
+}
+
+/* رأس الشات */
+
+.chat-header{
+height:60px;
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+background:rgba(255,255,255,.08);
+
+font-weight:700;
+font-size:18px;
+
+cursor:move;
+
+user-select:none;
+}
+
+/* الرسائل */
+
+.messages{
+height:390px;
+overflow-y:auto;
+padding:15px;
+}
+
+.msg{
+padding:12px;
+margin-bottom:10px;
+border-radius:15px;
+line-height:1.7;
+}
+
+.bot{
+background:rgba(255,255,255,.08);
+}
+
+.user{
+background:white;
+color:black;
+margin-right:40px;
+}
+
+/* الإدخال */
+
+.input-box{
+display:flex;
+border-top:1px solid rgba(255,255,255,.1);
+}
+
+.input-box input{
+flex:1;
+padding:15px;
+border:none;
+outline:none;
+background:transparent;
+color:white;
+}
+
+.input-box button{
+width:65px;
+border:none;
+cursor:pointer;
+background:white;
+font-size:18px;
+font-weight:bold;
+}
+
+.input-box button:hover{
+opacity:.9;
+}
+
+@media(max-width:768px){
+
+.chat-window{
+width:95%;
+height:80vh;
+right:10px;
+bottom:10px;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- الخلفية -->
+<div class="background">
+<img src="headphone.png" alt="">
+<div class="overlay"></div>
+</div>
+
+<!-- الشات -->
+<div class="chat-window" id="chatWindow">
+
+<div class="chat-header" id="dragHandle">
+🤖 MALAK SHOP
+</div>
+
+<div class="messages" id="messages"></div>
+
+<div class="input-box">
+<input
+id="input"
+placeholder="اكتبي رسالتك..."
+onkeydown="if(event.key==='Enter')sendMessage()">
+
+<button onclick="sendMessage()">➤</button>
+</div>
+
+</div>
+
+<script>
+
+/* سحب الشات */
+
+const chat=document.getElementById("chatWindow");
+const drag=document.getElementById("dragHandle");
+
+let isDragging=false;
+let offsetX;
+let offsetY;
+
+drag.addEventListener("mousedown",(e)=>{
+
+isDragging=true;
+
+offsetX=e.clientX-chat.offsetLeft;
+offsetY=e.clientY-chat.offsetTop;
+
+});
+
+document.addEventListener("mousemove",(e)=>{
+
+if(!isDragging) return;
+
+chat.style.left=(e.clientX-offsetX)+"px";
+chat.style.top=(e.clientY-offsetY)+"px";
+
+chat.style.right="auto";
+chat.style.bottom="auto";
+
+});
+
+document.addEventListener("mouseup",()=>{
+
+isDragging=false;
+
+});
+
+/* الشات */
+
+let step="start";
+
+const welcome=`
+👋 مرحباً بك في MALAK SHOP
+
+📱 هواتف ذكية
+
+💻 حواسيب محمولة
+
+🎧 سماعات احترافية
+
+⌚ ساعات ذكية
+
+🚚 توصيل لجميع الولايات
+
+💳 الدفع عند الاستلام
+
+هل تريد تقديم طلب؟
+`;
+
+function addMessage(text,type){
+
+const div=document.createElement("div");
+
+div.className="msg "+type;
+
+div.innerText=text;
+
+document.getElementById("messages").appendChild(div);
+
+document.getElementById("messages").scrollTop=
+document.getElementById("messages").scrollHeight;
+
+}
+
+window.onload=()=>{
+
+setTimeout(()=>{
+
+addMessage(welcome,"bot");
+
+step="ask";
+
+},1000);
+
+};
+
+function sendMessage(){
+
+const input=document.getElementById("input");
+
+const text=input.value.trim();
+
+if(!text) return;
+
+addMessage(text,"user");
+
+input.value="";
+
+const t=text.toLowerCase();
+
+setTimeout(()=>{
+
+if(step==="ask"){
+
+if(
+t.includes("نعم") ||
+t.includes("yes") ||
+t.includes("طلب")
+){
+
+addMessage(
+"ممتاز 🌟 أرسل الاسم الكامل ورقم الهاتف والعنوان.",
+"bot"
+);
+
+step="order";
+
+}else{
+
+addMessage(
+"شكراً لزيارتك ❤️",
+"bot"
+);
+
+step="end";
+
+}
+
+return;
+}
+
+if(step==="order"){
+
+addMessage(
+"هل أنت متأكد من تأكيد الطلب؟",
+"bot"
+);
+
+step="confirm";
+
+return;
+}
+
+if(step==="confirm"){
+
+if(
+t.includes("نعم") ||
+t.includes("yes")
+){
+
+addMessage(
+"✅ تم تأكيد الطلب بنجاح.",
+"bot"
+);
+
+}else{
+
+addMessage(
+"❌ تم إلغاء الطلب.",
+"bot"
+);
+
+}
+
+step="end";
+return;
+}
+
+},500);
+
+}
+
+</script>
+
+</body>
+</html>
