@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Malak Shop</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+font-family:'Cairo',sans-serif;
+height:100vh;
+overflow:hidden;
+background:#050505;
+display:flex;
+justify-content:center;
+align-items:center;
+color:white;
+}
+
+.background{
+position:fixed;
+inset:0;
+display:flex;
+justify-content:center;
+align-items:center;
+z-index:-2;
+}
+
+.big-text{
+position:absolute;
+font-size:180px;
+font-weight:800;
+color:transparent;
+-webkit-text-stroke:1px rgba(255,255,255,.12);
+text-align:center;
+}
+
+.hero{
+width:500px;
+max-width:80vw;
+animation:float 6s ease-in-out infinite;
+}
+
+@keyframes float{
+0%{transform:translateY(0);}
+50%{transform:translateY(-15px);}
+100%{transform:translateY(0);}
+}
+
+.chat{
+width:420px;
+height:620px;
+background:rgba(0,0,0,.75);
+backdrop-filter:blur(20px);
+border:1px solid rgba(255,255,255,.08);
+border-radius:25px;
+display:flex;
+flex-direction:column;
+overflow:hidden;
+}
+
+.header{
+padding:15px;
+text-align:center;
+font-weight:bold;
+border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.messages{
+flex:1;
+padding:15px;
+overflow-y:auto;
+}
+
+.msg{
+margin-bottom:10px;
+padding:10px 14px;
+border-radius:15px;
+font-size:14px;
+}
+
+.bot{
+background:rgba(255,255,255,.05);
+}
+
+.user{
+background:white;
+color:black;
+margin-right:40px;
+}
+
+.input-box{
+display:flex;
+border-top:1px solid rgba(255,255,255,.08);
+}
+
+.input-box input{
+flex:1;
+padding:12px;
+background:transparent;
+border:none;
+outline:none;
+color:white;
+}
+
+.input-box button{
+width:60px;
+cursor:pointer;
+border:none;
+background:white;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="background">
+<div class="big-text">WIRE<br>LESS</div>
+<img src="headphone.png" class="hero">
+</div>
+
+<div class="chat">
+
+<div class="header">MALAK SHOP</div>
+
+<div class="messages" id="messages"></div>
+
+<div class="input-box">
+<input id="input" placeholder="اكتبي رسالتك..." onkeydown="if(event.key==='Enter')sendMessage()">
+<button onclick="sendMessage()">➤</button>
+</div>
+
+</div>
+
+<!-- EmailJS -->
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+<script>
+emailjs.init("mtseCg7Q79u61GKUe");
+
+let step = "start";
+
+let order = {
+name: "",
+phone: "",
+message: ""
+};
+
+function addMessage(text,type){
+const div = document.createElement("div");
+div.className = "msg " + type;
+div.innerText = text;
+document.getElementById("messages").appendChild(div);
+}
+
+window.onload = () => {
+setTimeout(() => {
+addMessage("👋 مرحباً بك في MALAK SHOP\nهل تريد تقديم طلب؟ (نعم / لا)", "bot");
+step = "ask";
+}, 800);
+};
+
+function sendEmail(){
+emailjs.send(
+"service_foo2xe",
+"template_80967dt",
+order
+)
+.then(() => {
+addMessage("✅ تم إرسال الطلب بنجاح وسنتواصل معك قريباً", "bot");
+})
+.catch(() => {
+addMessage("❌ حدث خطأ في إرسال الطلب", "bot");
+});
+}
+
+function sendMessage(){
+
+const input = document.getElementById("input");
+const text = input.value.trim();
+if(!text) return;
+
+addMessage(text,"user");
+input.value="";
+
+setTimeout(()=>{
+
+const t = text.toLowerCase();
+
+// البداية
+if(step==="ask"){
+if(t.includes("نعم") || t.includes("yes")){
+addMessage("اكتب اسمك الكامل", "bot");
+step="name";
+}else{
+addMessage("شكراً لزيارتك ❤️", "bot");
+step="end";
+}
+return;
+}
+
+// الاسم
+if(step==="name"){
+order.name = text;
+addMessage("اكتب رقم الهاتف", "bot");
+step="phone";
+return;
+}
+
+// الهاتف
+if(step==="phone"){
+order.phone = text;
+addMessage("اكتب تفاصيل الطلب", "bot");
+step="message";
+return;
+}
+
+// الطلب
+if(step==="message"){
+order.message = text;
+addMessage("هل أنت متأكد من الطلب؟ (نعم / لا)", "bot");
+step="confirm";
+return;
+}
+
+// التأكيد
+if(step==="confirm"){
+if(t.includes("نعم") || t.includes("yes")){
+addMessage("⏳ يتم إرسال الطلب...", "bot");
+sendEmail();
+}else{
+addMessage("❌ تم إلغاء الطلب", "bot");
+}
+step="end";
+return;
+}
+
+},400);
+}
+
+</script>
+
+</body>
+</html>
