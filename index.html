@@ -476,17 +476,26 @@ function isValidName(t){ return t.trim().length >= 3; }
    EMAIL — Direct REST API (no fetch)
 ══════════════════════════════════════════ */
 function sendEmail(){
-  const data = JSON.stringify({
-    service_id  : "service_foo2xe",
-    template_id : "template_80967dt",
-    user_id     : "mtseCg7Q79u61GKUe",
-    template_params: {
-      from_name : order.name,
-      phone     : order.phone,
-      product   : order.product,
-      address   : order.address,
-      notes     : order.notes,
-    }
+  emailjs.send("service_foo2xe", "template_80967dt", {
+    from_name : order.name,
+    phone     : order.phone,
+    product   : order.product,
+    address   : order.address,
+    notes     : order.notes,
+  })
+  .then(function(){
+    botReply(
+      `✅ تم استلام طلبك بنجاح!\nسنتواصل معك على الرقم ${order.phone} في أقرب وقت 🎧`,
+      600
+    );
+    setProgress(100);
+    addSystem("رقم الطلب: #" + Date.now().toString().slice(-6));
+  })
+  .catch(function(err){
+    console.error("EmailJS error:", err);
+    botReply("❌ فشل إرسال الطلب (كود: " + (err.status || err) + ")\nتواصل معنا على واتساب مباشرة", 600);
+  });
+}
   });
 
   const xhr = new XMLHttpRequest();
