@@ -1,0 +1,833 @@
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Malak Shop</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Cairo', sans-serif;
+  height: 100vh;
+  overflow: hidden;
+  background: #050505;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+}
+
+.background {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: -2;
+}
+.big-text {
+  position: absolute;
+  font-size: 180px;
+  font-weight: 800;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255,255,255,.09);
+  text-align: center;
+  user-select: none;
+}
+.hero {
+  width: 500px;
+  max-width: 80vw;
+  animation: float 6s ease-in-out infinite;
+  opacity: .85;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-15px); }
+}
+
+/* ── Chat shell ── */
+.chat {
+  width: 430px;
+  height: 680px;
+  background: rgba(5,5,5,.88);
+  backdrop-filter: blur(28px);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 28px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 32px 80px rgba(0,0,0,.6);
+}
+
+.header {
+  padding: 18px 20px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.avatar {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg,#fff 0%,#aaa 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.header-info { flex: 1; }
+.header-name { font-size: 15px; font-weight: 700; letter-spacing: .3px; }
+.header-status { font-size: 11px; color: rgba(255,255,255,.45); margin-top: 1px; }
+.status-dot {
+  display: inline-block;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #4ade80;
+  margin-left: 5px;
+  box-shadow: 0 0 6px #4ade80;
+}
+
+/* ── Messages ── */
+.messages {
+  flex: 1;
+  padding: 18px 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  scroll-behavior: smooth;
+}
+.messages::-webkit-scrollbar { width: 4px; }
+.messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,.12); border-radius: 4px; }
+
+.msg {
+  max-width: 85%;
+  padding: 11px 15px;
+  border-radius: 18px;
+  font-size: 14px;
+  line-height: 1.7;
+  word-break: break-word;
+  animation: msgIn .22s ease;
+  white-space: pre-line;
+}
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.bot {
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.06);
+  border-bottom-right-radius: 5px;
+  align-self: flex-start;
+}
+.user {
+  background: white;
+  color: #111;
+  border-bottom-left-radius: 5px;
+  align-self: flex-end;
+}
+.system-msg {
+  text-align: center;
+  font-size: 11px;
+  color: rgba(255,255,255,.3);
+  padding: 2px 0;
+}
+
+/* ── Product Cards ── */
+.products-wrapper {
+  align-self: flex-start;
+  width: 100%;
+  animation: msgIn .3s ease;
+}
+.products-scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 4px 2px 8px;
+  scroll-snap-type: x mandatory;
+}
+.products-scroll::-webkit-scrollbar { height: 3px; }
+.products-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.18); border-radius: 3px; }
+
+.product-card {
+  min-width: 150px;
+  max-width: 150px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 16px;
+  padding: 12px 10px;
+  scroll-snap-align: start;
+  cursor: pointer;
+  transition: background .2s, border-color .2s, transform .15s;
+  text-align: center;
+  flex-shrink: 0;
+}
+.product-card:hover {
+  background: rgba(255,255,255,.12);
+  border-color: rgba(255,255,255,.3);
+  transform: translateY(-2px);
+}
+.product-card.selected {
+  border-color: rgba(255,255,255,.6);
+  background: rgba(255,255,255,.15);
+}
+.product-icon { font-size: 32px; margin-bottom: 6px; }
+.product-name { font-size: 12px; font-weight: 700; color: white; margin-bottom: 4px; }
+.product-price { font-size: 13px; font-weight: 800; color: #fbbf24; }
+.product-desc { font-size: 10px; color: rgba(255,255,255,.45); margin-top: 3px; line-height: 1.4; }
+
+/* ── Delivery info card ── */
+.delivery-card {
+  align-self: flex-start;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  padding: 13px 15px;
+  font-size: 13px;
+  line-height: 1.9;
+  animation: msgIn .25s ease;
+  width: fit-content;
+  max-width: 85%;
+}
+.delivery-card .d-row { display: flex; gap: 8px; align-items: flex-start; }
+.delivery-card .d-icon { flex-shrink: 0; }
+.delivery-card .d-label { color: rgba(255,255,255,.5); font-size: 11px; }
+.delivery-card .d-val { font-weight: 600; color: white; }
+
+/* ── Result cards (success / error) ── */
+.result-card {
+  align-self: flex-start;
+  border-radius: 16px;
+  padding: 14px 16px;
+  font-size: 13px;
+  line-height: 1.85;
+  animation: msgIn .3s ease;
+  max-width: 85%;
+  border: 1px solid;
+}
+.result-card.success {
+  background: rgba(74, 222, 128, .08);
+  border-color: rgba(74, 222, 128, .35);
+}
+.result-card.error {
+  background: rgba(248, 113, 113, .08);
+  border-color: rgba(248, 113, 113, .35);
+}
+.result-card .r-title { font-weight: 800; font-size: 14px; margin-bottom: 6px; }
+.result-card .r-body { white-space: pre-line; color: rgba(255,255,255,.85); }
+
+/* ── Chips ── */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 2px;
+  animation: msgIn .22s ease;
+}
+.chip {
+  padding: 7px 14px;
+  border-radius: 50px;
+  border: 1px solid rgba(255,255,255,.18);
+  background: transparent;
+  color: white;
+  font-family: 'Cairo', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.chip:hover { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.35); }
+.chip:disabled { opacity: .35; cursor: default; pointer-events: none; }
+
+/* typing */
+.typing {
+  display: flex; gap: 5px;
+  padding: 12px 16px;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 18px;
+  border-bottom-right-radius: 5px;
+  align-self: flex-start;
+  width: 56px;
+}
+.typing span {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.5);
+  animation: dot 1.3s infinite ease-in-out;
+}
+.typing span:nth-child(2) { animation-delay: .2s; }
+.typing span:nth-child(3) { animation-delay: .4s; }
+@keyframes dot {
+  0%,80%,100% { transform: scale(.7); opacity: .4; }
+  40%          { transform: scale(1);  opacity: 1; }
+}
+
+/* input */
+.input-bar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px;
+  border-top: 1px solid rgba(255,255,255,.07);
+}
+.input-bar input {
+  flex: 1; padding: 11px 16px;
+  border-radius: 50px;
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.05);
+  color: white;
+  font-family: 'Cairo', sans-serif;
+  font-size: 14px; outline: none;
+  transition: border-color .2s;
+}
+.input-bar input::placeholder { color: rgba(255,255,255,.3); }
+.input-bar input:focus { border-color: rgba(255,255,255,.28); }
+.send-btn {
+  width: 42px; height: 42px;
+  border-radius: 50%; border: none;
+  background: white; color: #111;
+  font-size: 17px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: transform .15s, opacity .15s;
+}
+.send-btn:hover { transform: scale(1.08); }
+.send-btn:disabled { opacity: .35; cursor: default; transform: none; }
+
+.progress-bar { height: 3px; background: rgba(255,255,255,.06); overflow: hidden; }
+.progress-fill { height: 100%; background: rgba(255,255,255,.55); transition: width .4s ease; }
+</style>
+</head>
+<body>
+
+<div class="background">
+  <div class="big-text">WIRE<br>LESS</div>
+  <img src="headphone.png" class="hero" alt="">
+</div>
+
+<div class="chat">
+  <div class="header">
+    <div class="avatar">🎧</div>
+    <div class="header-info">
+      <div class="header-name">MALAK SHOP</div>
+      <div class="header-status"><span class="status-dot"></span>متاح الآن</div>
+    </div>
+  </div>
+
+  <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+  <div class="messages" id="messages"></div>
+
+  <div class="input-bar">
+    <input id="input" placeholder="اكتب رسالتك…" autocomplete="off"
+           onkeydown="if(event.key==='Enter' && !event.isComposing) sendMessage()">
+    <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   GOOGLE SHEETS WEBHOOK (Apps Script)
+══════════════════════════════════════════ */
+const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbzBE2Nsqdflp0FNz06_zoKiacWBUFaOoHDgtbGKtwdU-4KizB7t6nI9wRTV0-VHIEh5/exec";
+
+/* ══════════════════════════════════════════
+   PRODUCTS DATA  (price stored as a number for calculations)
+══════════════════════════════════════════ */
+const PRODUCTS = [
+  { id:1, icon:"🎧", name:"سماعة سوني WH-1000XM5", price:899, desc:"إلغاء ضوضاء احترافي" },
+  { id:2, icon:"🎵", name:"سماعة JBL Tune 770NC", price:449, desc:"صوت نقي وبطارية 70 ساعة" },
+  { id:3, icon:"🎤", name:"سماعة Apple AirPods Pro 2", price:799, desc:"تكامل مثالي مع Apple" },
+  { id:4, icon:"🔊", name:"سماعة Bose QuietComfort 45", price:699, desc:"راحة لا مثيل لها" },
+  { id:5, icon:"⚡", name:"سماعة Samsung Galaxy Buds 3", price:349, desc:"لاسلكية خفيفة وسريعة الشحن" },
+];
+
+const DELIVERY = [
+  { icon:"🚚", label:"التوصيل", val:"شامل داخل المدينة" },
+  { icon:"⏱️", label:"مدة التوصيل", val:"2-3 أيام عمل" },
+  { icon:"📦", label:"الشحن خارج المدينة", val:"30 ريال إضافية" },
+  { icon:"↩️", label:"الإرجاع", val:"7 أيام من تاريخ الاستلام" },
+  { icon:"💳", label:"الدفع", val:"عند الاستلام أو تحويل" },
+];
+
+/* ══════════════════════════════════════════
+   STATE
+══════════════════════════════════════════ */
+let step = "start";
+let order = { name:"", phone:"", product:"", productPrice:0, quantity:1, total:0, address:"", notes:"" };
+let isBusy = false;
+let isSending = false; // hard guard against duplicate submissions
+
+/* ══════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+
+const STEPS_PROGRESS = { start:0, products:10, ask:20, name:35, phone:48, product:60, quantity:70, address:80, notes:90, confirm:96, end:100 };
+function setProgress(p){ $("progress").style.width = p + "%"; }
+
+function scrollBottom(){ const m=$("messages"); m.scrollTop=m.scrollHeight; }
+
+function setBusy(val){
+  isBusy = val;
+  $("sendBtn").disabled = val;
+  $("input").disabled   = val;
+  document.querySelectorAll(".chip").forEach(c => c.disabled = val);
+}
+
+const ARABIC_DIGITS = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+function toArabicDigits(num){
+  return String(num).replace(/[0-9]/g, d => ARABIC_DIGITS[d]);
+}
+function formatPrice(num){
+  return toArabicDigits(num) + " ريال";
+}
+
+function addMsg(text, type){
+  const div = document.createElement("div");
+  div.className = "msg " + type;
+  div.innerText = text;
+  $("messages").appendChild(div);
+  scrollBottom();
+}
+
+function addSystem(text){
+  const div = document.createElement("div");
+  div.className = "system-msg";
+  div.innerText = text;
+  $("messages").appendChild(div);
+  scrollBottom();
+}
+
+function addChips(labels, callback){
+  const row = document.createElement("div");
+  row.className = "chips";
+  labels.forEach(label => {
+    const btn = document.createElement("button");
+    btn.className = "chip";
+    btn.innerText = label;
+    btn.onclick = () => {
+      row.querySelectorAll(".chip").forEach(c => { c.disabled = true; c.style.opacity = ".4"; });
+      callback(label);
+    };
+    row.appendChild(btn);
+  });
+  $("messages").appendChild(row);
+  scrollBottom();
+}
+
+/* Products display — clickable to select */
+function addProductCards(selectable=false){
+  const wrapper = document.createElement("div");
+  wrapper.className = "products-wrapper";
+  const scroll = document.createElement("div");
+  scroll.className = "products-scroll";
+
+  PRODUCTS.forEach(p => {
+    const card = document.createElement("div");
+    card.className = "product-card";
+    card.dataset.id = p.id;
+    card.innerHTML = `
+      <div class="product-icon">${p.icon}</div>
+      <div class="product-name">${p.name}</div>
+      <div class="product-price">${formatPrice(p.price)}</div>
+      <div class="product-desc">${p.desc}</div>
+    `;
+    if(selectable){
+      card.onclick = () => {
+        if(isBusy) return;
+        scroll.querySelectorAll(".product-card").forEach(c => c.classList.remove("selected"));
+        card.classList.add("selected");
+        scroll.querySelectorAll(".product-card").forEach(c => { c.style.pointerEvents = "none"; });
+
+        order.product = p.name;
+        order.productPrice = p.price;
+
+        handleInput(p.name);
+      };
+    }
+    scroll.appendChild(card);
+  });
+
+  wrapper.appendChild(scroll);
+  $("messages").appendChild(wrapper);
+  scrollBottom();
+}
+
+/* Delivery info display */
+function addDeliveryCard(){
+  const card = document.createElement("div");
+  card.className = "delivery-card";
+  DELIVERY.forEach(d => {
+    const row = document.createElement("div");
+    row.className = "d-row";
+    row.innerHTML = `<span class="d-icon">${d.icon}</span><span><span class="d-label">${d.label}: </span><span class="d-val">${d.val}</span></span>`;
+    card.appendChild(row);
+  });
+  $("messages").appendChild(card);
+  scrollBottom();
+}
+
+/* Success / error result card */
+function addResultCard(type, title, body){
+  const card = document.createElement("div");
+  card.className = "result-card " + type;
+
+  const titleEl = document.createElement("div");
+  titleEl.className = "r-title";
+  titleEl.innerText = title;
+
+  const bodyEl = document.createElement("div");
+  bodyEl.className = "r-body";
+  bodyEl.innerText = body;
+
+  card.appendChild(titleEl);
+  card.appendChild(bodyEl);
+  $("messages").appendChild(card);
+  scrollBottom();
+}
+
+/* Typing indicator */
+function showTyping(){
+  if($("typing-el")) return;
+  const el = document.createElement("div");
+  el.className = "typing"; el.id = "typing-el";
+  el.innerHTML = "<span></span><span></span><span></span>";
+  $("messages").appendChild(el);
+  scrollBottom();
+}
+function hideTyping(){
+  const el = $("typing-el");
+  if(el) el.remove();
+}
+
+/* Bot reply with queue support */
+function botReply(text, delay=700, chips=null, chipsCallback=null, extras=null){
+  setBusy(true);
+  showTyping();
+  setTimeout(() => {
+    hideTyping();
+    addMsg(text, "bot");
+    if(extras) extras();   // inject product cards / delivery card etc.
+    if(chips && chipsCallback) addChips(chips, chipsCallback);
+    setBusy(false);
+  }, delay);
+}
+
+/* ══════════════════════════════════════════
+   VALIDATION
+══════════════════════════════════════════ */
+function isYes(t){
+  return /^(نعم|اه|اوك|ok|yes|يس|ايوا|موافق|بالتأكيد|تمام|اكيد|✅)/i.test(t);
+}
+function isNo(t){
+  return /^(لا|no|لأ|ما|مو|كلا|❌)/i.test(t);
+}
+function isValidPhone(t){ return /^[0-9\s\+\-]{7,15}$/.test(t.trim()); }
+function isValidName(t){ return t.trim().length >= 3; }
+function isValidQuantity(t){
+  const n = parseInt(t.trim(), 10);
+  return /^[0-9]+$/.test(t.trim()) && n >= 1 && n <= 50;
+}
+
+/* ══════════════════════════════════════════
+   SEND ORDER — to Google Sheet via Apps Script Web App
+══════════════════════════════════════════ */
+async function sendOrder(){
+  // Hard guard: never allow a second concurrent submission
+  if(isSending){
+    console.warn("⛔ sendOrder() called while a request is already in flight — ignoring duplicate click.");
+    return;
+  }
+  isSending = true;
+  setBusy(true);
+  showTyping();
+
+  const payload = {
+    name:     order.name,
+    phone:    order.phone,
+    product:  order.product,
+    quantity: order.quantity,
+    total:    order.total,
+    address:  order.address,
+    notes:    order.notes,
+  };
+
+  try{
+    // Apps Script web apps don't return CORS headers for fetch,
+    // so we use mode:"no-cors" — the request still reaches the
+    // sheet, but we can't read the response body.
+    await fetch(SHEET_WEBHOOK_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    });
+
+    hideTyping();
+    const orderNumber = Date.now().toString().slice(-6);
+
+    addMsg("✅ تم استلام طلبك بنجاح!", "bot");
+    addResultCard(
+      "success",
+      "🎉 تم تأكيد الطلب",
+      `رقم الطلب: #${orderNumber}\nسنتواصل معك على الرقم ${order.phone} في أقرب وقت 🎧`
+    );
+    addSystem("رقم الطلب: #" + orderNumber);
+
+    setProgress(100);
+    step = "end";
+
+  } catch(err){
+    console.error("❌ Failed to send order:", err);
+
+    hideTyping();
+
+    let reason = "تعذر الاتصال بالخادم. تحقق من اتصال الإنترنت وحاول مجدداً";
+    if(err && err.message) reason = err.message;
+
+    addMsg("❌ فشل إرسال الطلب", "bot");
+    addResultCard(
+      "error",
+      "⚠️ تعذر إرسال الطلب",
+      `السبب: ${reason}\nيمكنك إعادة المحاولة أو التواصل معنا مباشرة على واتساب`
+    );
+
+    addChips(["🔁 إعادة المحاولة", "❌ إلغاء الطلب"], chip => {
+      if(chip.includes("إعادة")){
+        sendOrder();
+      } else {
+        step = "end";
+        order = { name:"", phone:"", product:"", productPrice:0, quantity:1, total:0, address:"", notes:"" };
+        addMsg("تم إلغاء الطلب ❌\nيمكنك البدء من جديد في أي وقت 😊", "bot");
+        setProgress(100);
+        setBusy(false);
+      }
+    });
+
+  } finally {
+    isSending = false;
+    if(step === "end" && !$("typing-el")){
+      setBusy(false);
+    }
+    scrollBottom();
+  }
+}
+
+/* ══════════════════════════════════════════
+   MAIN HANDLER
+══════════════════════════════════════════ */
+function handleInput(text){
+  const t = text.trim();
+  if(!t || isBusy) return;
+
+  addMsg(t, "user");
+
+  setTimeout(() => {
+
+    /* ── ask ── */
+    if(step === "ask"){
+      if(isYes(t)){
+        step = "name";
+        setProgress(STEPS_PROGRESS.name);
+        botReply("ممتاز! 🎉\nما اسمك الكريم؟", 650);
+      } else if(isNo(t)){
+        step = "end";
+        setProgress(100);
+        botReply("لا مشكلة، يسعدنا زيارتك دائماً ❤️\nلو احتجت أي شيء نحن هنا!", 650);
+      } else {
+        botReply(
+          "ما فهمت ردك 😅\nاختر أحد الخيارات:",
+          650,
+          ["نعم، أريد طلب 🛒", "لا، شكراً"],
+          chip => handleInput(chip)
+        );
+      }
+      return;
+    }
+
+    /* ── name ── */
+    if(step === "name"){
+      if(!isValidName(t)){
+        botReply("⚠️ الاسم قصير جداً، من فضلك اكتب اسمك الكامل", 600);
+        return;
+      }
+      order.name = t;
+      step = "phone";
+      setProgress(STEPS_PROGRESS.phone);
+      botReply(`أهلاً ${order.name}! 😊\nما رقم جوالك؟`, 700);
+      return;
+    }
+
+    /* ── phone ── */
+    if(step === "phone"){
+      if(!isValidPhone(t)){
+        botReply("⚠️ رقم الجوال غير صحيح، تأكد من الرقم وحاول مجدداً", 600);
+        return;
+      }
+      order.phone = t.trim();
+      step = "product";
+      setProgress(STEPS_PROGRESS.product);
+      setBusy(true);
+      showTyping();
+      setTimeout(() => {
+        hideTyping();
+        addMsg("اختر المنتج الذي تريده 👇", "bot");
+        addProductCards(true);   // selectable
+        setBusy(false);
+      }, 700);
+      return;
+    }
+
+    /* ── product (set directly by card click handler) ── */
+    if(step === "product"){
+      if(!order.product){
+        botReply("⚠️ من فضلك اختر منتجاً من القائمة أعلاه", 600);
+        return;
+      }
+      step = "quantity";
+      setProgress(STEPS_PROGRESS.quantity);
+      botReply(
+        `اخترت: ${order.product} — ${formatPrice(order.productPrice)} ✅\n\nكم الكمية المطلوبة؟ (اكتب رقماً، مثال: 1)`,
+        750
+      );
+      return;
+    }
+
+    /* ── quantity ── */
+    if(step === "quantity"){
+      if(!isValidQuantity(t)){
+        botReply("⚠️ من فضلك أدخل كمية صحيحة (رقم من 1 إلى 50)", 600);
+        return;
+      }
+      order.quantity = parseInt(t.trim(), 10);
+      order.total = order.productPrice * order.quantity;
+      step = "address";
+      setProgress(STEPS_PROGRESS.address);
+      botReply(
+        `الكمية: ${order.quantity}\nالإجمالي: ${formatPrice(order.total)}\n\nاكتب عنوان التوصيل بالتفصيل:\n(المدينة، الحي، الشارع، رقم المبنى)`,
+        750
+      );
+      return;
+    }
+
+    /* ── address ── */
+    if(step === "address"){
+      if(t.length < 8){
+        botReply("⚠️ العنوان قصير جداً، اكتب العنوان بشكل أوضح من فضلك", 600);
+        return;
+      }
+      order.address = t;
+      step = "notes";
+      setProgress(STEPS_PROGRESS.notes);
+      botReply("هل لديك ملاحظات إضافية على الطلب؟\n(لون معين، وقت مفضل…)\nأو اكتب «لا» إذا لم يكن لديك ملاحظات", 750);
+      return;
+    }
+
+    /* ── notes ── */
+    if(step === "notes"){
+      order.notes = isNo(t) ? "لا توجد ملاحظات" : t;
+      step = "confirm";
+      setProgress(STEPS_PROGRESS.confirm);
+
+      const summary =
+        `📋 ملخص طلبك:\n\n` +
+        `👤 الاسم: ${order.name}\n` +
+        `📞 الجوال: ${order.phone}\n` +
+        `🎧 المنتج: ${order.product}\n` +
+        `🔢 الكمية: ${order.quantity}\n` +
+        `💰 الإجمالي: ${formatPrice(order.total)}\n` +
+        `📍 عنوان التوصيل: ${order.address}\n` +
+        `📝 ملاحظات: ${order.notes}\n\n` +
+        `هل تؤكد الطلب؟`;
+
+      botReply(
+        summary, 800,
+        ["✅ نعم، أرسل الطلب", "❌ لا، إلغاء"],
+        chip => handleInput(chip)
+      );
+      return;
+    }
+
+    /* ── confirm ── */
+    if(step === "confirm"){
+      if(isYes(t) || t.includes("أرسل") || t.includes("ارسل")){
+        setBusy(true);
+        showTyping();
+        setTimeout(() => {
+          hideTyping();
+          addMsg("⏳ يتم إرسال طلبك، يرجى الانتظار…", "bot");
+          sendOrder();
+        }, 600);
+      } else {
+        step = "end";
+        order = { name:"", phone:"", product:"", productPrice:0, quantity:1, total:0, address:"", notes:"" };
+        setProgress(100);
+        botReply("تم إلغاء الطلب ❌\nيمكنك البدء من جديد في أي وقت 😊", 600);
+      }
+      return;
+    }
+
+    /* ── end – restart ── */
+    if(step === "end"){
+      step = "ask";
+      order = { name:"", phone:"", product:"", productPrice:0, quantity:1, total:0, address:"", notes:"" };
+      setProgress(STEPS_PROGRESS.ask);
+      botReply(
+        "مرحباً من جديد! 👋\nهل تريد تقديم طلب جديد؟",
+        600,
+        ["نعم، أريد طلب 🛒", "لا، شكراً"],
+        chip => handleInput(chip)
+      );
+      return;
+    }
+
+  }, 300);
+}
+
+function sendMessage(){
+  const inp = $("input");
+  const text = inp.value;
+  inp.value = "";
+  handleInput(text);
+}
+
+/* ══════════════════════════════════════════
+   BOOT
+══════════════════════════════════════════ */
+window.onload = () => {
+  setBusy(true);
+
+  // رسالة ترحيب
+  setTimeout(() => {
+    hideTyping();
+    addMsg("👋 أهلاً وسهلاً في MALAK SHOP!\nإليك أحدث منتجاتنا المتاحة:", "bot");
+    addProductCards(false);   // display only at boot
+    setProgress(STEPS_PROGRESS.products);
+  }, 900);
+
+  // معلومات التوصيل
+  setTimeout(() => {
+    showTyping();
+    setTimeout(() => {
+      hideTyping();
+      addMsg("🚚 معلومات التوصيل والدفع:", "bot");
+      addDeliveryCard();
+    }, 700);
+  }, 1800);
+
+  // سؤال الطلب
+  setTimeout(() => {
+    showTyping();
+    setTimeout(() => {
+      hideTyping();
+      step = "ask";
+      setProgress(STEPS_PROGRESS.ask);
+      addMsg("هل تريد تقديم طلب الآن؟ 🛒", "bot");
+      addChips(
+        ["نعم، أريد طلب 🛒", "لا، شكراً"],
+        chip => handleInput(chip)
+      );
+      setBusy(false);
+    }, 700);
+  }, 3200);
+};
+</script>
+</body>
+</html>
