@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Malak Shop</title>
+
+<style>
+body{
+  margin:0;
+  font-family: Arial;
+  background:#050505;
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.chat{
+  width:420px;
+  height:680px;
+  background:#111;
+  border-radius:20px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+.header{
+  padding:15px;
+  background:#222;
+  text-align:center;
+}
+
+.messages{
+  flex:1;
+  padding:15px;
+  overflow:auto;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.msg{
+  padding:10px;
+  border-radius:10px;
+  max-width:80%;
+}
+
+.bot{background:#333; align-self:flex-start;}
+.user{background:white;color:black;align-self:flex-end;}
+
+.input{
+  display:flex;
+  padding:10px;
+  gap:10px;
+  border-top:1px solid #333;
+}
+
+input{
+  flex:1;
+  padding:10px;
+  border-radius:10px;
+  border:none;
+}
+
+button{
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  background:white;
+}
+</style>
+</head>
+
+<body>
+
+<div class="chat">
+  <div class="header">MALAK SHOP</div>
+
+  <div class="messages" id="messages"></div>
+
+  <div class="input">
+    <input id="input" placeholder="اكتب..." onkeydown="if(event.key==='Enter')sendMessage()">
+    <button onclick="sendMessage()">➤</button>
+  </div>
+</div>
+
+<script>
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzBE2Nsqdflp0FNz06_zoKiacWBUFaOoHDgtbGKtwdU-4KizB7t6nI9wRTV0-VHIEh5/exec";
+
+let step = "name";
+let order = {
+  name:"",
+  phone:"",
+  product:"",
+  quantity:1,
+  total:0
+};
+
+function addMsg(text,type){
+  const div=document.createElement("div");
+  div.className="msg "+type;
+  div.innerText=text;
+  document.getElementById("messages").appendChild(div);
+}
+
+function handle(text){
+
+  addMsg(text,"user");
+
+  if(step==="name"){
+    order.name=text;
+    step="phone";
+    addMsg("اكتب رقم الهاتف","bot");
+  }
+
+  else if(step==="phone"){
+    order.phone=text;
+    step="product";
+    addMsg("اكتب اسم المنتج","bot");
+  }
+
+  else if(step==="product"){
+    order.product=text;
+    step="quantity";
+    addMsg("اكتب الكمية","bot");
+  }
+
+  else if(step==="quantity"){
+    order.quantity=parseInt(text)||1;
+    order.total=order.quantity*100;
+
+    step="send";
+    addMsg("جاري إرسال الطلب...","bot");
+
+    sendToSheet();
+  }
+}
+
+async function sendToSheet(){
+
+  console.log("📤 sending...");
+
+  const data = {
+    name:order.name,
+    phone:order.phone,
+    product:order.product,
+    quantity:order.quantity,
+    total:order.total,
+    date:new Date().toLocaleString()
+  };
+
+  try{
+    await fetch(GOOGLE_SCRIPT_URL,{
+      method:"POST",
+      mode:"no-cors",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify(data)
+    });
+
+    addMsg("✅ تم إرسال الطلب بنجاح","bot");
+
+  }catch(err){
+    console.log(err);
+    addMsg("❌ فشل الإرسال","bot");
+  }
+}
+
+function sendMessage(){
+  const input=document.getElementById("input");
+  const text=input.value;
+  input.value="";
+  handle(text);
+}
+
+addMsg("👋 أهلاً بك في Malak Shop","bot");
+addMsg("اكتب اسمك للبدء","bot");
+</script>
+
+</body>
+</html>
